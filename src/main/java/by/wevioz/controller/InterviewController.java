@@ -1,5 +1,7 @@
 package by.wevioz.controller;
 
+import by.wevioz.dto.InterviewDto;
+import by.wevioz.service.InterviewService;
 import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -7,16 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/interview")
 public class InterviewController {
-    @Autowired
-    private RuntimeService runtimeService;
+    private final InterviewService service;
+
+    public InterviewController(InterviewService interviewService) {
+        service = interviewService;
+    }
 
     @PostMapping
-    public ResponseEntity startProcess() {
-//        runtimeService.startProcessInstanceById("Interview_lifecycle_process");
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("Interview_lifecycle_process");
-        return ResponseEntity.ok("Process started with instance ID: " + processInstance.getId());
+    public InterviewDto startProcess() {
+        return service.startProcess();
+    }
+
+    @PostMapping("/send")
+    public InterviewDto sendInterview(@RequestBody @Valid InterviewDto interviewDto) {
+        return service.sendInterview(interviewDto);
     }
 }
