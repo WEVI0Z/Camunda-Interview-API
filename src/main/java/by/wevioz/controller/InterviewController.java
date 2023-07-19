@@ -29,4 +29,9 @@ public class InterviewController {
     public InterviewDto sendInterview(@RequestBody @Valid InterviewDto interviewDto) {
         return service.sendInterview(interviewDto);
     }
+
+    @PostMapping("/add")
+    public InterviewDto addStep(@RequestBody @Valid InterviewDto interviewDto) {
+        return service.addStep(interviewDto);
+    }
 }

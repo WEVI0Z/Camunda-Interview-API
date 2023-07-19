@@ -43,13 +43,36 @@ public class InterviewService {
                 findTask(interviewDto.getInstanceId(), TaskIdEnum.TRIGGER_INTERVIEW_REVALIDATION.getTitle()) :
                 findTask(interviewDto.getInstanceId(), TaskIdEnum.RESOLVE_INTERVIEW.getTitle());
 
+        return getInterviewDto(interviewDto, task);
+    }
+
+    public InterviewDto addStep(InterviewDto interviewDto) {
+        Task task = findTask(interviewDto.getInstanceId(), TaskIdEnum.CREATE_STEP.getTitle());
+
+        return getInterviewDto(interviewDto, task);
+    }
+
+    private InterviewDto getInterviewDto(InterviewDto interviewDto, Task task) {
         Map<String, Object> variables = new HashMap<>();
 
         variables.put("interviewData", interviewDto.getInterviewData());
 
         taskService.complete(task.getId(), variables);
 
+        String status = getCurrentActivityStatus(interviewDto.getInstanceId());
+
+        interviewDto.setStatus(status);
+
         return interviewDto;
+    }
+
+    private String getCurrentActivityStatus(String processInstanceId) {
+        String status = "DONE";
+
+        if (runtimeService.getActivityInstance(processInstanceId) != null)
+            status = (String) runtimeService.getVariable(processInstanceId, "status");
+
+        return status;
     }
 
     private Task findTask(String processInstanceId, String taskId) {
@@ -63,7 +86,7 @@ public class InterviewService {
                 .findFirst();
 
         if (task.isEmpty()) {
-            throw new RuntimeException();
+            throw new RuntimeException("Task not found");
         }
 
         return task.get();

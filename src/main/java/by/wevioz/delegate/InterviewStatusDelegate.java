@@ -10,12 +10,6 @@ public class InterviewStatusDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
-        switch (delegateExecution.getCurrentActivityId()) {
-            case (IN_PROGRESS_ACTIVITY_ID) -> delegateExecution.setVariable("status", "in progress");
-            case (REVIEW_ACTIVITY_ID) -> delegateExecution.setVariable("status", "review");
-            case (DONE_ACTIVITY_ID) -> delegateExecution.setVariable("status", "done");
-        }
-
         System.out.println(this.toString());
     }
 }

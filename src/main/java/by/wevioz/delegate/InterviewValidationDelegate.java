@@ -12,10 +12,6 @@ public class InterviewValidationDelegate implements JavaDelegate {
 
         delegateExecution.setVariable("interviewValid", valid);
 
-        if (!valid) {
-            throw new RuntimeException("The sent interview is invalid");
-        }
-
         System.out.println(this.toString());
     }
 }
