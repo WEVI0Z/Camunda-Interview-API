@@ -69,12 +69,10 @@ public class InterviewService {
         return interviewDto;
     }
 
-    private boolean checkIfProcessExists(String processInstanceId) {
+    private void checkIfProcessExists(String processInstanceId) {
         if (runtimeService.getActivityInstance(processInstanceId) == null) {
             throw new NotFoundException("process");
         }
-
-        return true;
     }
 
     private String getCurrentActivityStatus(String processInstanceId) {
