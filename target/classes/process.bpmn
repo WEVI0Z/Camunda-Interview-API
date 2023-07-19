@@ -178,13 +178,15 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_06x0z6t" sourceRef="Activity_1mbml87" targetRef="Gateway_1kjqvoh" />
     <bpmn:sequenceFlow id="Flow_1jng1bp" name="Yes" sourceRef="Gateway_1kjqvoh" targetRef="Activity_0kxp5e8">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewCompletedStatus.resolutionFilled &amp;&amp; interviewCompletedStatus.interviewFilled}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewValid}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:userTask id="Trigger_revalidation" name="Trigger interview revalidation">
       <bpmn:incoming>Flow_1nexy81</bpmn:incoming>
       <bpmn:outgoing>Flow_1mux7nk</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_1nexy81" name="No" sourceRef="Gateway_1kjqvoh" targetRef="Trigger_revalidation" />
+    <bpmn:sequenceFlow id="Flow_1nexy81" name="No" sourceRef="Gateway_1kjqvoh" targetRef="Trigger_revalidation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewValid}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1mux7nk" sourceRef="Trigger_revalidation" targetRef="Activity_1mbml87" />
     <bpmn:textAnnotation id="TextAnnotation_0iqgmco">
       <bpmn:text>Notifying interviewee about previous passed step status</bpmn:text>

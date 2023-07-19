@@ -2,14 +2,11 @@ package by.wevioz.service;
 
 import by.wevioz.dto.InterviewDto;
 import by.wevioz.enumeration.TaskIdEnum;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -40,9 +37,17 @@ public class InterviewService {
     }
 
     public InterviewDto sendInterview(InterviewDto interviewDto) {
-        Task task = findTask(interviewDto.getInstanceId(), TaskIdEnum.RESOLVE_INTERVIEW.getTitle());
+        boolean revalidation = !(runtimeService.getVariable(interviewDto.getInstanceId(), "interviewValid") == null);
 
-        taskService.complete(task.getId());
+        Task task = revalidation ?
+                findTask(interviewDto.getInstanceId(), TaskIdEnum.TRIGGER_INTERVIEW_REVALIDATION.getTitle()) :
+                findTask(interviewDto.getInstanceId(), TaskIdEnum.RESOLVE_INTERVIEW.getTitle());
+
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("interviewData", interviewDto.getInterviewData());
+
+        taskService.complete(task.getId(), variables);
 
         return interviewDto;
     }
