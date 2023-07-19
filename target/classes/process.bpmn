@@ -5,6 +5,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="status">REVIEW</camunda:inputParameter>
+          <camunda:outputParameter name="status">${status}</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0xkxb6p</bpmn:incoming>
@@ -41,6 +42,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="status">IN_PROGRESS</camunda:inputParameter>
+          <camunda:outputParameter name="status">${status}</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0wixspk</bpmn:incoming>
@@ -104,6 +106,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="status">DONE</camunda:inputParameter>
+          <camunda:outputParameter name="status">${status}</camunda:outputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1wn0kuj</bpmn:incoming>
@@ -131,7 +134,7 @@
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_00bj13n" name="Yes" sourceRef="Gateway_1q7ain8" targetRef="Activity_0daz6d7">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewCompletedStatus.interviewFilled}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewValid}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1tkfsw8" sourceRef="Gateway_0s3t9e4" targetRef="Interview_auto_resolver_job" />
     <bpmn:exclusiveGateway id="Gateway_1w0cw5j" name="Is interview completed and resolution exists">
@@ -141,10 +144,10 @@
       <bpmn:outgoing>Flow_1j7r19m</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1wn0kuj" name="Yes" sourceRef="Gateway_1w0cw5j" targetRef="Activity_0kxp5e8">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewCompletedStatus.resolutionFilled &amp;&amp; interviewCompletedStatus.interviewFilled}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewValid}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1j7r19m" name="No" sourceRef="Gateway_1w0cw5j" targetRef="Gateway_1q7ain8">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewCompletedStatus.resolutionFilled || !interviewCompletedStatus.interviewFilled}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewValid}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sendTask id="Activity_0daz6d7" name="Notify the interviewee and sales/account manager, admin" camunda:class="by.wevioz.delegate.InterviewStillInProgressMailDelegate">
       <bpmn:incoming>Flow_00bj13n</bpmn:incoming>
@@ -161,7 +164,7 @@
     <bpmn:sequenceFlow id="Flow_0evaqlu" sourceRef="Event_0rclv1e" targetRef="Activity_136816h" />
     <bpmn:sequenceFlow id="Flow_1najoz8" sourceRef="Activity_0daz6d7" targetRef="Event_0rclv1e" />
     <bpmn:sequenceFlow id="Flow_09mim1p" name="No" sourceRef="Gateway_1q7ain8" targetRef="Event_0rclv1e">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewCompletedStatus.resolutionFilled &amp;&amp; interviewCompletedStatus.interviewFilled}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewValid}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0le8l3k" sourceRef="Activity_10753a3" targetRef="Activity_1mbml87" />
     <bpmn:sequenceFlow id="Flow_1ddpfwx" sourceRef="Activity_136816h" targetRef="Gateway_1w0cw5j" />
@@ -178,13 +181,15 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_06x0z6t" sourceRef="Activity_1mbml87" targetRef="Gateway_1kjqvoh" />
     <bpmn:sequenceFlow id="Flow_1jng1bp" name="Yes" sourceRef="Gateway_1kjqvoh" targetRef="Activity_0kxp5e8">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewCompletedStatus.resolutionFilled &amp;&amp; interviewCompletedStatus.interviewFilled}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${interviewValid}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:userTask id="Trigger_revalidation" name="Trigger interview revalidation">
       <bpmn:incoming>Flow_1nexy81</bpmn:incoming>
       <bpmn:outgoing>Flow_1mux7nk</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_1nexy81" name="No" sourceRef="Gateway_1kjqvoh" targetRef="Trigger_revalidation" />
+    <bpmn:sequenceFlow id="Flow_1nexy81" name="No" sourceRef="Gateway_1kjqvoh" targetRef="Trigger_revalidation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!interviewValid}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1mux7nk" sourceRef="Trigger_revalidation" targetRef="Activity_1mbml87" />
     <bpmn:textAnnotation id="TextAnnotation_0iqgmco">
       <bpmn:text>Notifying interviewee about previous passed step status</bpmn:text>
