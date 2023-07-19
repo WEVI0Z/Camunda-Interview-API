@@ -2,6 +2,7 @@ package by.wevioz.service;
 
 import by.wevioz.dto.InterviewDto;
 import by.wevioz.enumeration.TaskIdEnum;
+import by.wevioz.exception.NotFoundException;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -13,7 +14,7 @@ import java.util.*;
 
 @Service
 public class InterviewService {
-    List<String> instancesIds = new ArrayList<>();
+    private final String MAIN_PROCESS_NAME = "Interview_lifecycle_process";
     private final RuntimeService runtimeService;
     private final TaskService taskService;
 
@@ -27,16 +28,16 @@ public class InterviewService {
     }
 
     public InterviewDto startProcess() {
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("Interview_lifecycle_process");
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(MAIN_PROCESS_NAME);
 
         String instanceId = processInstance.getId();
-
-        instancesIds.add(instanceId);
 
         return new InterviewDto(instanceId);
     }
 
     public InterviewDto sendInterview(InterviewDto interviewDto) {
+        checkIfProcessExists(interviewDto.getInstanceId());
+
         boolean revalidation = !(runtimeService.getVariable(interviewDto.getInstanceId(), "interviewValid") == null);
 
         Task task = revalidation ?
@@ -47,6 +48,8 @@ public class InterviewService {
     }
 
     public InterviewDto addStep(InterviewDto interviewDto) {
+        checkIfProcessExists(interviewDto.getInstanceId());
+
         Task task = findTask(interviewDto.getInstanceId(), TaskIdEnum.CREATE_STEP.getTitle());
 
         return getInterviewDto(interviewDto, task);
@@ -64,6 +67,14 @@ public class InterviewService {
         interviewDto.setStatus(status);
 
         return interviewDto;
+    }
+
+    private boolean checkIfProcessExists(String processInstanceId) {
+        if (runtimeService.getActivityInstance(processInstanceId) == null) {
+            throw new NotFoundException("process");
+        }
+
+        return true;
     }
 
     private String getCurrentActivityStatus(String processInstanceId) {
@@ -86,7 +97,7 @@ public class InterviewService {
                 .findFirst();
 
         if (task.isEmpty()) {
-            throw new RuntimeException("Task not found");
+            throw new NotFoundException("task");
         }
 
         return task.get();
